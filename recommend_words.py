@@ -131,3 +131,14 @@ def get_gendered_words(processed_text):
         if len(cat) > 0 and cat[0] != 'Neutral' and cat[0] is not np.nan:
             results.append((token_tuple[0], token_tuple[1], token_tuple[2], cat[0]))
     return results
+
+
+def highlight_gendered_words(text, gendered_word_results):
+    """ Highlight gendered words from gendered_word_results and raw text
+
+        Returns string """
+
+    for result in gendered_word_results:
+        highlight_regex = re.compile(r'\b({})\b'.format(' '.join(result[1].split('_'))), re.IGNORECASE)
+        text = re.sub(highlight_regex, r'<em>\1</em>', text)
+    return text
