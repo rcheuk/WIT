@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 from gensim.models.word2vec import Word2Vec
 from nltk.stem.porter import PorterStemmer
@@ -7,9 +6,10 @@ from gensim.models.phrases import Phraser
 import re
 from stop_words import get_stop_words
 from nltk import pos_tag
+from sqlalchemy import create_engine
 
 # Word score and stem mapping
-stem_df = pd.read_csv('stem_map.csv')
+db_connect = create_engine('sqlite:///wit_stem_map.db')
 
 # Word embedding model
 model = Word2Vec.load('resumes_word2vec.model')
@@ -28,45 +28,55 @@ def get_stem_from_word(word):
 def get_most_similar(word, topn=10, gender=None, pos=None):
     """ Get most similar words by gender or part of speech
 
-        Returns list of tuples with:
+        Returns a list of dictionaries with:
 
-        - list of word expansions from the recommended stem
-        - list of parts of speech of the word expansions
-        - gender category of the stem
-        - similarity score """
+        - 'word': list tuples containing of word expansions from the recommended stem,
+           parts of speech, and the gender category of the stem
+        - 'similarity': similarity score of recommended stem to input word range [0, 1] """
 
+    conn = db_connect.connect()
+    stem = get_stem_from_word(word)
     recommendations = []
+
     if gender is None and pos is None:
-        sim_tuples = model.most_similar(get_stem_from_word(word), topn=topn)
+        sim_tuples = model.most_similar(stem, topn=topn)
         for sim_tuple in sim_tuples:
-            stem_results = stem_df[stem_df.stem == sim_tuple[0]]
-            recommendations.append((stem_results.word.tolist(),
-                                    stem_results.pos.tolist(),
-                                    stem_results.category.tolist()[0],
-                                    round(sim_tuple[1], 3)))
+            query = conn.execute('SELECT word, pos, category FROM wit_stem_map WHERE stem = "{}"' \
+                                 .format(sim_tuple[0]))
+            stem_results = {'word': [i for i in query.cursor.fetchall()],
+                            'similarity': round(sim_tuple[1], 3)}
+            recommendations.append(stem_results)
+
         return recommendations
     else:
-        sim_tuples = model.most_similar(get_stem_from_word(word), topn=1000)
+        sim_tuples = model.most_similar(stem, topn=10000)
         if pos is None:
             if isinstance(gender, str):
                 gender = [gender]
-            ok_words = stem_df.stem[stem_df.category.isin(gender)].tolist()
+            query = conn.execute('SELECT stem FROM wit_stem_map WHERE category IN ("{}")' \
+                                 .format('", "'.join(gender)))
+            ok_words = [i[0] for i in query.cursor.fetchall()]
         elif gender is None:
             pos = pos.upper()
-            ok_words = stem_df.stem[stem_df.pos.str.contains(pos)].tolist()
+            query = conn.execute('SELECT stem FROM wit_stem_map WHERE pos LIKE "%{}%"' \
+                                 .format(pos))
+            ok_words = [i[0] for i in query.cursor.fetchall()]
         else:
             if isinstance(gender, str):
                 gender = [gender]
             pos = pos.upper()
-            ok_words = stem_df.stem[(stem_df.category.isin(gender)) & (stem_df.pos.str.contains(pos))].tolist()
+            query = conn.execute('SELECT stem FROM wit_stem_map WHERE category IN ("{}") ' \
+                                 'AND pos LIKE "%{}%"' \
+                                 .format('", "'.join(gender), pos))
+            ok_words = [i[0] for i in query.cursor.fetchall()]
         count = 0
         for sim_tuple in sim_tuples:
             if sim_tuple[0] in ok_words:
-                stem_results = stem_df[stem_df.stem == sim_tuple[0]]
-                recommendations.append((stem_results.word.tolist(),
-                                        stem_results.pos.tolist(),
-                                        stem_results.category.tolist()[0],
-                                        round(sim_tuple[1], 3)))
+                query = conn.execute('SELECT word, pos, category FROM wit_stem_map WHERE stem = "{}"' \
+                                     .format(sim_tuple[0]))
+                stem_results = {'word': [i for i in query.cursor.fetchall()],
+                                'similarity': round(sim_tuple[1], 3)}
+                recommendations.append(stem_results)
                 count += 1
                 if count == topn:
                     return recommendations
@@ -125,11 +135,17 @@ def get_gendered_words(processed_text):
         - part of speech
         - gender category """
 
+    conn = db_connect.connect()
     results = []
     for token_tuple in processed_text:
-        cat = stem_df.category[stem_df.stem == token_tuple[0]].get_values()
-        if len(cat) > 0 and cat[0] != 'Neutral' and cat[0] is not np.nan:
-            results.append((token_tuple[0], token_tuple[1], token_tuple[2], cat[0]))
+        query = conn.execute('SELECT category FROM wit_stem_map WHERE stem = "{}"' \
+                             .format(token_tuple[0]))
+        try:
+            category = query.first()[0]
+        except Exception as e:
+            continue
+        if category not in ['Neutral', '']:
+            results.append((token_tuple[0], token_tuple[1], token_tuple[2], category))
     return results
 
 
