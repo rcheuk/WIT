@@ -9,7 +9,7 @@ from nltk import pos_tag
 from sqlalchemy import create_engine
 
 # Word score and stem mapping
-db_connect = create_engine('sqlite:///wit_stem_map.db')
+db_connect = create_engine('sqlite:///stem_map.db')
 
 # Word embedding model
 model = Word2Vec.load('resumes_word2vec.model')
@@ -41,7 +41,7 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
     if gender is None and pos is None:
         sim_tuples = model.most_similar(stem, topn=topn)
         for sim_tuple in sim_tuples:
-            query = conn.execute('SELECT word, pos, category FROM wit_stem_map WHERE stem = "{}"' \
+            query = conn.execute('SELECT word, pos, category FROM stem_map WHERE stem = "{}"' \
                                  .format(sim_tuple[0]))
             stem_results = {'word': [i for i in query.cursor.fetchall()],
                             'similarity': round(sim_tuple[1], 3)}
@@ -53,26 +53,26 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
         if pos is None:
             if isinstance(gender, str):
                 gender = [gender]
-            query = conn.execute('SELECT stem FROM wit_stem_map WHERE category IN ("{}")' \
+            query = conn.execute('SELECT stem FROM stem_map WHERE category IN ("{}")' \
                                  .format('", "'.join(gender)))
             ok_words = [i[0] for i in query.cursor.fetchall()]
         elif gender is None:
             pos = pos.upper()
-            query = conn.execute('SELECT stem FROM wit_stem_map WHERE pos LIKE "%{}%"' \
+            query = conn.execute('SELECT stem FROM stem_map WHERE pos LIKE "%{}%"' \
                                  .format(pos))
             ok_words = [i[0] for i in query.cursor.fetchall()]
         else:
             if isinstance(gender, str):
                 gender = [gender]
             pos = pos.upper()
-            query = conn.execute('SELECT stem FROM wit_stem_map WHERE category IN ("{}") ' \
+            query = conn.execute('SELECT stem FROM stem_map WHERE category IN ("{}") ' \
                                  'AND pos LIKE "%{}%"' \
                                  .format('", "'.join(gender), pos))
             ok_words = [i[0] for i in query.cursor.fetchall()]
         count = 0
         for sim_tuple in sim_tuples:
             if sim_tuple[0] in ok_words:
-                query = conn.execute('SELECT word, pos, category FROM wit_stem_map WHERE stem = "{}"' \
+                query = conn.execute('SELECT word, pos, category FROM stem_map WHERE stem = "{}"' \
                                      .format(sim_tuple[0]))
                 stem_results = {'word': [i for i in query.cursor.fetchall()],
                                 'similarity': round(sim_tuple[1], 3)}
@@ -138,7 +138,7 @@ def get_gendered_words(processed_text):
     conn = db_connect.connect()
     results = []
     for token_tuple in processed_text:
-        query = conn.execute('SELECT category FROM wit_stem_map WHERE stem = "{}"' \
+        query = conn.execute('SELECT category FROM stem_map WHERE stem = "{}"' \
                              .format(token_tuple[0]))
         try:
             category = query.first()[0]
@@ -156,5 +156,5 @@ def highlight_gendered_words(text, gendered_word_results):
 
     for result in gendered_word_results:
         highlight_regex = re.compile(r'\b({})\b'.format(' '.join(result[1].split('_'))), re.IGNORECASE)
-        text = re.sub(highlight_regex, r'<em>\1</em>', text)
+        text = re.sub(highlight_regex, r'<span class="{}">\1</span>'.format(result[3]), text)
     return text

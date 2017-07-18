@@ -2,7 +2,7 @@
 
 To better target women for tech jobs, we need to write job postings to which women will apply. This means writing job postings in which women can see themselves--job postings that use the language women use to describe themselves.<br>
 
-We use a language model built from thousands of resumes to identify gendered language and make recommendations for replacements. Words are categorized as "Strongly Male", "Male", "Neutral", "Female", and "Strongly Female".<br>
+We use a language model built from thousands of resumes to identify gendered language and make recommendations for replacements. Words are categorized as `strongly_male`, `male`, `neutral`, `female`, and `strongly_female`.<br>
 
 The language model for identifying contextually similar words and bigram parser for pre-processing new text are contained in the files `resumes_word2vec.model` and `resumes_bigrams.model`, respectively. The vocabulary, stem expansions, parts of speech, and gender categories are in the sqlite3 database `wit_stem_map.db`.<br>
 
@@ -11,7 +11,7 @@ The `example.ipynb` notebook demonstrates the core functions:<br>
 - `read_text(text_file)` reads in a text file and returns it as a string.
 - `process_text(text)` pre-process and tokenizes a text string for use in analysis. It returns a list of tuples for each word token in the text of the form `(word stem, original word, part of speech)`.
 - `get_gendered_words(processed_text)` takes the processed_text list and returns a list of tuples for those tokens that are identified as gendered in the form `(word stem, original word, part of speech, gender category)`.
-- `highlight_gendered_words(text, gendered_word_list)` take in the raw text and the gendered word list from get_gendered_words to return the raw text string with the gendered words highlighted via `<em></em>`.
+- `highlight_gendered_words(text, gendered_word_list)` take in the raw text and the gendered word list from get_gendered_words to return the raw text string with the gendered words highlighted via `<span class="gender_tag"></span>`, where `gender_tag` is one of the five gendered language categories.
 
 
 ## Getting Started
