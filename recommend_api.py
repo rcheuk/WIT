@@ -30,7 +30,7 @@ def analyze_document():
         processed_text = process_text(text)
         word_data = get_gendered_words(processed_text)
         highlighted_text = highlight_gendered_words(text, word_data)
-        return json.dumps({'highlighted_text': highlighted_text}, ensure_ascii=False)
+        return json.dumps({'highlighted_text': str(highlighted_text)}, ensure_ascii=False)
 
     except Exception as e:
         return json.dumps({'error': str(e)}, ensure_ascii=False)
