@@ -12,3 +12,17 @@ The `example.ipynb` notebook demonstrates the core functions:<br>
 - `process_text(text)` pre-process and tokenizes a text string for use in analysis. It returns a list of tuples for each word token in the text of the form `(word stem, original word, part of speech)`.
 - `get_gendered_words(processed_text)` takes the processed_text list and returns a list of tuples for those tokens that are identified as gendered in the form `(word stem, original word, part of speech, gender category)`.
 - `highlight_gendered_words(text, gendered_word_list)` take in the raw text and the gendered word list from get_gendered_words to return the raw text string with the gendered words highlighted via `<em></em>`.
+
+
+## Getting Started
+
+Clone this repo, and run `pip install -r requirements.txt` to install all depedencies.
+
+### Other dependencies
+
+Make sure you also install nltk and nltk_data. To install additional nltk dependencies, start a python interactive shell: `python`. Then type `import nltk`, followed by `nltk.download()`. This will bring up a GUI that will prompt you on which libraries you want to install. Select all. 
+
+To start the server, run `FLASK_APP=recommend_api.py flask run`.
+
+Open your browser to `http://localhost:5000/recommend`, and you should see the data returned!
+

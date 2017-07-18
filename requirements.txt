@@ -1,0 +1,9 @@
+numpy==1.13.1
+Word2Vec==0.9.1
+PorterStemmer==0.5
+stop_words==2015.2.23.1
+nltk==3.2.4
+sqlalchemy==1.1.11
+flask==0.12.2
+scipy==0.19.1
+gensim==2.2.0
