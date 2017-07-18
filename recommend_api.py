@@ -16,6 +16,9 @@ def recommend():
         if gender is not None:
             gender = gender.split(',')
 
+        if pos is not None:
+            pos = pos.split(',')
+
         recommendations = get_most_similar(word, topn=topn, gender=gender, pos=pos)
         return json.dumps({'recommendations': recommendations}, ensure_ascii=False)
 

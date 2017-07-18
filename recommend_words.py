@@ -57,17 +57,23 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
                                  .format('", "'.join(gender)))
             ok_words = [i[0] for i in query.cursor.fetchall()]
         elif gender is None:
-            pos = pos.upper()
-            query = conn.execute('SELECT stem FROM stem_map WHERE pos LIKE "%{}%"' \
-                                 .format(pos))
+            if isinstance(pos, str):
+                pos = [pos]
+            pos = [ppart.upper() for p in pos for ppart in p.split('_')]
+            pos_query = 'pos LIKE "%' + '%" OR pos LIKE "%'.join(pos) + '%"'
+            query = conn.execute('SELECT stem FROM stem_map WHERE {}' \
+                                 .format(pos_query))
             ok_words = [i[0] for i in query.cursor.fetchall()]
         else:
             if isinstance(gender, str):
                 gender = [gender]
-            pos = pos.upper()
+            if isinstance(pos, str):
+                pos = [pos]
+            pos = [ppart.upper() for p in pos for ppart in p.split('_')]
+            pos_query = 'pos LIKE "%' + '%" OR pos LIKE "%'.join(pos) + '%"'
             query = conn.execute('SELECT stem FROM stem_map WHERE category IN ("{}") ' \
-                                 'AND pos LIKE "%{}%"' \
-                                 .format('", "'.join(gender), pos))
+                                 'AND {}' \
+                                 .format('", "'.join(gender), pos_query))
             ok_words = [i[0] for i in query.cursor.fetchall()]
         count = 0
         for sim_tuple in sim_tuples:
