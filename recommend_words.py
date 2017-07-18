@@ -144,7 +144,7 @@ def get_gendered_words(processed_text):
             category = query.first()[0]
         except Exception as e:
             continue
-        if category not in ['Neutral', '']:
+        if category not in ['neutral', '']:
             results.append((token_tuple[0], token_tuple[1], token_tuple[2], category))
     return results
 
