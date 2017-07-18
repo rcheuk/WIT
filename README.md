@@ -24,5 +24,5 @@ Make sure you also install nltk and nltk_data. To install additional nltk depend
 
 To start the server, run `FLASK_APP=recommend_api.py flask run`.
 
-Open your browser to `http://localhost:5000/recommend`, and you should see the data returned!
+Open your browser to `http://localhost:5000/recommend?word=self_motivated`, and you should see the data returned!
 
