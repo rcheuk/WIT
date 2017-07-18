@@ -49,7 +49,7 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
 
         return recommendations
     else:
-        sim_tuples = model.most_similar(stem, topn=10000)
+        sim_tuples = model.most_similar(stem, topn=1000)
         if pos is None:
             if isinstance(gender, str):
                 gender = [gender]
