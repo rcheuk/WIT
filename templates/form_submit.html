@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TargetHer</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <form method="post" action="{{ url_for('analyze_document') }}">
+        {{ document_form.hidden_tag() }}
+        {{ document_form.text.label }} <br />
+        {{ document_form.text }} <br />
+        {{ document_form.submitdoc }}
+    </form>
+
+<br /><br />
+
+    <form method="post" action="{{ url_for('recommend') }}">
+        {{ word_form.hidden_tag() }}
+        {{ word_form.word.label }} <br />
+        {{ word_form.strongly_male }}
+        {{ word_form.strongly_male.label }}
+        {{ word_form.male }}
+        {{ word_form.male.label }}
+        {{ word_form.neutral }}
+        {{ word_form.neutral.label }}
+        {{ word_form.female }}
+        {{ word_form.female.label }}
+        {{ word_form.strongly_female }}
+        {{ word_form.strongly_female.label }} <br />
+        {{ word_form.pos.label }}
+        {{ word_form.pos }} <br />
+        {{ word_form.word }}
+        {{ word_form.submitword }}
+    </form>
+</body>
+</html>
