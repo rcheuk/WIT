@@ -7,3 +7,5 @@ sqlalchemy==1.1.11
 flask==0.12.2
 scipy==0.19.1
 gensim==2.2.0
+Flask-WTF==0.14.2
+WTForms==2.1
