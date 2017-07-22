@@ -1,4 +1,5 @@
 import json
+import urllib
 from flask import Flask, request
 
 from recommend_words import get_most_similar, read_text, process_text, get_gendered_words, highlight_gendered_words
@@ -35,7 +36,7 @@ def recommend():
 @app.route('/analyze_document', methods=['GET', 'POST'])
 def analyze_document():
     try:
-        data = json.loads(request.data.decode())
+        data = json.loads(urllib.parse.unquote(request.data))
         text = data['text']
         processed_text = process_text(text)
         word_data = get_gendered_words(processed_text)
