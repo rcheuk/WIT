@@ -6,12 +6,12 @@ from recommend_words import get_most_similar, read_text, process_text, get_gende
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def hello():
     return 'Hello World!'
 
 
-@app.route('/recommend')
+@app.route('/recommend', methods=['POST'])
 def recommend():
     try:
         word = request.args.get('word')
@@ -32,7 +32,7 @@ def recommend():
         return json.dumps({'error': str(e)}, ensure_ascii=False)
 
 
-@app.route('/analyze_document')
+@app.route('/analyze_document', methods=['POST'])
 def analyze_document():
     try:
         data = json.loads(request.data.decode())
