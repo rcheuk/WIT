@@ -11,7 +11,7 @@ def hello():
     return 'Hello World!'
 
 
-@app.route('/recommend', methods=['POST'])
+@app.route('/recommend', methods=['GET', 'POST'])
 def recommend():
     try:
         word = request.args.get('word')
@@ -32,7 +32,7 @@ def recommend():
         return json.dumps({'error': str(e)}, ensure_ascii=False)
 
 
-@app.route('/analyze_document', methods=['POST'])
+@app.route('/analyze_document', methods=['GET', 'POST'])
 def analyze_document():
     try:
         data = json.loads(request.data.decode())
