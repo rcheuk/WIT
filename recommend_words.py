@@ -43,7 +43,8 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
         for sim_tuple in sim_tuples:
             query = conn.execute('SELECT word, pos, category FROM stem_map WHERE stem = "{}"' \
                                  .format(sim_tuple[0]))
-            stem_results = {'word': [i for i in query.cursor.fetchall()],
+            stem_results = {'word': [(i[0].replace('_', ' '), i[1].replace('_', ' '), i[2])
+                                     for i in query.cursor.fetchall()],
                             'similarity': round(sim_tuple[1], 3)}
             recommendations.append(stem_results)
 
@@ -80,7 +81,8 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
             if sim_tuple[0] in ok_words:
                 query = conn.execute('SELECT word, pos, category FROM stem_map WHERE stem = "{}"' \
                                      .format(sim_tuple[0]))
-                stem_results = {'word': [i for i in query.cursor.fetchall()],
+                stem_results = {'word': [(i[0].replace('_', ' '), i[1].replace('_', ' '), i[2])
+                                         for i in query.cursor.fetchall()],
                                 'similarity': round(sim_tuple[1], 3)}
                 recommendations.append(stem_results)
                 count += 1
