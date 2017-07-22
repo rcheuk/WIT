@@ -5,7 +5,7 @@ from nltk.tokenize import RegexpTokenizer
 from gensim.models.phrases import Phraser
 import re
 from stop_words import get_stop_words
-from nltk import pos_tag
+# from nltk import pos_tag
 from sqlalchemy import create_engine
 
 # Word score and stem mapping
@@ -126,11 +126,11 @@ def process_text(text):
     text = [token for token in text if token not in en_stop]
 
     # part of speech
-    pos = ['_'.join([tag[1] for tag in pos_tag(token.split('_'), tagset='universal')]) for token in text]
+    #pos = ['_'.join([tag[1] for tag in pos_tag(token.split('_'), tagset='universal')]) for token in text]
 
     # stems
     stems = ['_'.join([p_stemmer.stem(t) for t in token.split('_')]) for token in text]
-    return list(zip(stems, text, pos))
+    return list(zip(stems, text))
 
 
 def get_gendered_words(processed_text):
@@ -140,7 +140,7 @@ def get_gendered_words(processed_text):
 
         - stem
         - word
-        - part of speech
+        - part of speech (dropped)
         - gender category """
 
     conn = db_connect.connect()
@@ -153,7 +153,7 @@ def get_gendered_words(processed_text):
         except Exception:
             continue
         if category not in ['neutral', '']:
-            results.append((token_tuple[0], token_tuple[1], token_tuple[2], category))
+            results.append((token_tuple[0], token_tuple[1], category))
     return results
 
 
@@ -164,6 +164,6 @@ def highlight_gendered_words(text, gendered_word_results):
 
     for result in gendered_word_results:
         highlight_regex = re.compile(r'\b({})\b'.format(' '.join(result[1].split('_'))), re.IGNORECASE)
-        text = re.sub(highlight_regex, r'<a class="{}" ng-click=""showWord({})">\1</a>'.format(result[3], result[1]),
+        text = re.sub(highlight_regex, r'<a class="{}" ng-click=""showWord({})">\1</a>'.format(result[2], result[1]),
                       text)
     return text
