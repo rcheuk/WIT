@@ -148,7 +148,7 @@ def get_gendered_words(processed_text):
                              .format(token_tuple[0]))
         try:
             category = query.first()[0]
-        except Exception as e:
+        except Exception:
             continue
         if category not in ['neutral', '']:
             results.append((token_tuple[0], token_tuple[1], token_tuple[2], category))
@@ -162,5 +162,6 @@ def highlight_gendered_words(text, gendered_word_results):
 
     for result in gendered_word_results:
         highlight_regex = re.compile(r'\b({})\b'.format(' '.join(result[1].split('_'))), re.IGNORECASE)
-        text = re.sub(highlight_regex, r'<span class="{}">\1</span>'.format(result[3]), text)
+        text = re.sub(highlight_regex, r'<a class="{}" ng-click=""showWord({})">\1</a>'.format(result[3], result[1]),
+                      text)
     return text
