@@ -5,9 +5,11 @@ from recommend_words import get_most_similar, read_text, process_text, get_gende
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def hello():
-	return 'Hello World'
+    return 'Hello World!'
+
 
 @app.route('/recommend')
 def recommend():
@@ -29,11 +31,12 @@ def recommend():
     except Exception as e:
         return json.dumps({'error': str(e)}, ensure_ascii=False)
 
+
 @app.route('/analyze_document')
 def analyze_document():
     try:
-        file = request.args.get('file')
-        text = read_text(file)
+        data = json.loads(request.data.decode())
+        text = data['text']
         processed_text = process_text(text)
         word_data = get_gendered_words(processed_text)
         highlighted_text = highlight_gendered_words(text, word_data)
@@ -42,5 +45,6 @@ def analyze_document():
     except Exception as e:
         return json.dumps({'error': str(e)}, ensure_ascii=False)
 
+
 if __name__ == "__main__":
-	app.run(host='127.0.0.1', port=8000)
+    app.run(host='127.0.0.1', port=8000)
