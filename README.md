@@ -26,3 +26,6 @@ To start the server, run `FLASK_APP=recommend_api.py flask run`.
 
 Open your browser to `http://localhost:5000/recommend?word=self_motivated`, and you should see the data returned!
 
+### TODO
+
+* Move data to another database. [currently uses sqlite]

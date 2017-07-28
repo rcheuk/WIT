@@ -12,10 +12,10 @@ from sqlalchemy import create_engine
 db_connect = create_engine('sqlite:///stem_map.db')
 
 # Word embedding model
-model = Word2Vec.load('resumes_word2vec.model')
+model = Word2Vec.load('../models/resumes_word2vec.model')
 
 # Bigrams phraser
-bigram = Phraser.load('resumes_bigrams.model')
+bigram = Phraser.load('../models/resumes_bigrams.model')
 
 
 def get_stem_from_word(word):

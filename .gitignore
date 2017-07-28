@@ -1,0 +1,5 @@
+*.pyc
+
+/data
+/env/local.py
+/deploy/wit_app_nginx.conf
