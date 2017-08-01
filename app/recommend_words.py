@@ -9,13 +9,13 @@ from stop_words import get_stop_words
 from sqlalchemy import create_engine
 
 # Word score and stem mapping
-db_connect = create_engine('sqlite:///stem_map.db')
+db_connect = create_engine('sqlite:////home/ubuntu/WIT/app/stem_map.db')
 
 # Word embedding model
-model = Word2Vec.load('../models/resumes_word2vec.model')
+model = Word2Vec.load('/home/ubuntu/WIT/app/resumes_word2vec.model')
 
 # Bigrams phraser
-bigram = Phraser.load('../models/resumes_bigrams.model')
+bigram = Phraser.load('/home/ubuntu/WIT/app/resumes_bigrams.model')
 
 
 def get_stem_from_word(word):
