@@ -4,7 +4,7 @@ from flask import Flask, request, make_response, current_app
 from datetime import timedelta
 from functools import update_wrapper
 
-from recommend_words import get_most_similar, read_text, process_text, get_gendered_words, highlight_gendered_words
+from recommend_words import get_most_similar, process_text, get_gendered_words, highlight_gendered_words
 
 app = Flask(__name__)
 
