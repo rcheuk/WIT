@@ -1,21 +1,19 @@
-import numpy as np
-from gensim.models.word2vec import Word2Vec
+from gensim.models.wrappers import FastText
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 from gensim.models.phrases import Phraser
 import re
 from stop_words import get_stop_words
-# from nltk import pos_tag
 from sqlalchemy import create_engine
 
 # Word score and stem mapping
-db_connect = create_engine('sqlite:////home/ubuntu/WIT/app/stem_map.db')
+db_connect = create_engine('sqlite:///stem_map_20170802.db')
 
 # Word embedding model
-model = Word2Vec.load('/home/ubuntu/WIT/app/resumes_word2vec.model')
+model = FastText.load_fasttext_format('language_model_20170802')
 
 # Bigrams phraser
-bigram = Phraser.load('/home/ubuntu/WIT/app/resumes_bigrams.model')
+bigram = Phraser.load('bigram_phraser_20170801.model')
 
 
 def get_stem_from_word(word):
@@ -35,7 +33,7 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
         - 'similarity': similarity score of recommended stem to input word range [0, 1] """
 
     conn = db_connect.connect()
-    stem = get_stem_from_word(word)
+    stem = get_stem_from_word(word.replace(' ', '_'))
     recommendations = []
 
     if gender is None and pos is None:
@@ -43,7 +41,7 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
         for sim_tuple in sim_tuples:
             query = conn.execute('SELECT word, pos, category FROM stem_map WHERE stem = "{}"' \
                                  .format(sim_tuple[0]))
-            stem_results = {'word': [(i[0].replace('_', ' '), i[1].replace('_', ' '), i[2])
+            stem_results = {'word': [(i[0].replace('_', ' '), i[1].replace('_', ' '), i[2].replace('_', ' '))
                                      for i in query.cursor.fetchall()],
                             'similarity': round(sim_tuple[1], 3)}
             recommendations.append(stem_results)
@@ -81,7 +79,7 @@ def get_most_similar(word, topn=10, gender=None, pos=None):
             if sim_tuple[0] in ok_words:
                 query = conn.execute('SELECT word, pos, category FROM stem_map WHERE stem = "{}"' \
                                      .format(sim_tuple[0]))
-                stem_results = {'word': [(i[0].replace('_', ' '), i[1].replace('_', ' '), i[2])
+                stem_results = {'word': [(i[0].replace('_', ' '), i[1].replace('_', ' '), i[2].replace('_', ' '))
                                          for i in query.cursor.fetchall()],
                                 'similarity': round(sim_tuple[1], 3)}
                 recommendations.append(stem_results)
@@ -108,8 +106,7 @@ def process_text(text):
         Returns list of tuples with:
 
         - stem
-        - original word
-        - part of speech """
+        - original word """
 
     tokenizer = RegexpTokenizer(r'(?u)\b\w\w{2,}\b')
     en_stop = get_stop_words('en')
@@ -125,9 +122,6 @@ def process_text(text):
     text = bigram[text]
     text = [token for token in text if token not in en_stop]
 
-    # part of speech
-    #pos = ['_'.join([tag[1] for tag in pos_tag(token.split('_'), tagset='universal')]) for token in text]
-
     # stems
     stems = ['_'.join([p_stemmer.stem(t) for t in token.split('_')]) for token in text]
     return list(zip(stems, text))
@@ -140,7 +134,7 @@ def get_gendered_words(processed_text):
 
         - stem
         - word
-        - part of speech (dropped)
+        - part of speech
         - gender category """
 
     conn = db_connect.connect()
@@ -153,7 +147,13 @@ def get_gendered_words(processed_text):
         except Exception:
             continue
         if category not in ['neutral', '']:
-            results.append((token_tuple[0], token_tuple[1], category))
+            query = conn.execute('SELECT pos FROM stem_map WHERE word = "{}"' \
+                                 .format(token_tuple[1]))
+            try:
+                pos = query.first()[0]
+            except Exception:
+                pos = None
+            results.append((token_tuple[0], token_tuple[1], pos, category))
     return results
 
 
@@ -164,6 +164,6 @@ def highlight_gendered_words(text, gendered_word_results):
 
     for result in gendered_word_results:
         highlight_regex = re.compile(r'\b({})\b'.format(' '.join(result[1].split('_'))), re.IGNORECASE)
-        text = re.sub(highlight_regex, r'<a class="{}" ng-click=""showWord({})">\1</a>'.format(result[2], result[1]),
+        text = re.sub(highlight_regex, r'<a class="{}" ng-click="showWord({})">\1</a>'.format(result[3], result[1]),
                       text)
     return text
