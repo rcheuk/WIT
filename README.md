@@ -29,3 +29,23 @@ Open your browser to `http://localhost:5000/recommend?word=self_motivated`, and 
 ### TODO
 
 * Move data to another database. [currently uses sqlite]
+
+## TO UPDATE ON UBUNTU
+
+Stop the service that runs the uwsgi server in the background  
+`sudo stop WIT` 
+
+Update repo in home directory.  
+`git clone {... repo url ... }`
+
+Go to server directory  
+`cd /var/www/WIT`     
+
+Remove py files or any fiels that need to be updated  
+`rm *.p`    
+ 
+Copy files from git repo to server directory   
+`cp ~/WIT/*.py .`   
+
+Restart the service  
+`sudo start WIT `   
